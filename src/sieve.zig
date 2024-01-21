@@ -8,6 +8,7 @@ pub fn Cache(comptime K: type, comptime V: type) type {
         const Self = @This();
         const HashMapUnmanaged = if (K == []const u8) std.StringHashMapUnmanaged(*Node) else std.AutoHashMapUnmanaged(K, *Node);
 
+        /// Intrusive cache's node.
         pub const Node = struct {
             is_visited: bool = false,
             prev: ?*Node = null,
