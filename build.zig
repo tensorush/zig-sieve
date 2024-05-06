@@ -2,7 +2,7 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const root_source_file = std.Build.LazyPath.relative("src/sieve.zig");
+    const root_source_file = b.path("src/sieve.zig");
 
     // Module
     _ = b.addModule("sieve", .{ .root_source_file = root_source_file });
@@ -39,7 +39,7 @@ pub fn build(b: *std.Build) void {
 
     const bench = b.addExecutable(.{
         .name = "sieve_bench",
-        .root_source_file = std.Build.LazyPath.relative("src/bench.zig"),
+        .root_source_file = b.path("src/bench.zig"),
         .target = target,
         .optimize = .ReleaseFast,
     });
