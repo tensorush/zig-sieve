@@ -26,6 +26,29 @@ const sieve_mod = sieve_dep.module("sieve");
 <compile>.root_module.addImport("sieve", sieve_mod);
 ```
 
+### :bar_chart: Benchmarks
+
+- Sequence: the time to cache and retrieve integer values.
+
+    ```sh
+    $ zig build bench -- -s
+    Sequence: 28.833us
+    ```
+
+- Composite: the time to cache and retrieve composite values.
+
+    ```sh
+    $ zig build bench -- -c
+    Composite: 45.291us
+    ```
+
+- Composite (normal): the time to cache and retrieve normally-distributed composite values.
+
+    ```sh
+    $ zig build bench -- -n
+    Composite Normal: 135.25us
+    ```
+
 <!-- MARKDOWN LINKS -->
 
 [ci-shd]: https://img.shields.io/github/actions/workflow/status/tensorush/zig-sieve/ci.yaml?branch=main&style=for-the-badge&logo=github&label=CI&labelColor=black

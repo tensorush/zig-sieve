@@ -46,8 +46,10 @@ pub fn build(b: *std.Build) void {
     });
 
     const benchs_run = b.addRunArtifact(benchs);
+    if (b.args) |args| {
+        benchs_run.addArgs(args);
+    }
     benchs_step.dependOn(&benchs_run.step);
-    b.default_step.dependOn(benchs_step);
 
     // Test suite
     const tests_step = b.step("test", "Run test suite");
