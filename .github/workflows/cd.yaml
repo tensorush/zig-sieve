@@ -3,48 +3,36 @@ name: Continuous Delivery
 on:
   push:
     branches: [main]
-    paths: ["**.zig"]
-
-  pull_request:
-    branches: [main]
-    paths: ["**.zig"]
 
   workflow_dispatch:
 
-permissions:
-  pages: write
-  contents: read
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
-  build:
+  emit:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Zig
-        uses: goto-bus-stop/setup-zig@v2
+        uses: mlugg/setup-zig@v1
 
-      - name: Emit docs
-        run: |
-          zig build docs
-          rm -rf zig-out/docs/src/std/
+      - name: Run `doc`
+        run: zig build doc
 
       - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: zig-out/docs/
+          path: zig-out/doc/
 
   deploy:
-    needs: build
+    needs: emit
 
     runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
 
     environment:
       name: github-pages
@@ -53,4 +41,4 @@ jobs:
     steps:
       - name: Deploy artifact to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4

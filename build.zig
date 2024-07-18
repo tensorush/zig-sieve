@@ -2,7 +2,9 @@ const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
     const root_source_file = b.path("src/sieve.zig");
+    const version = std.SemanticVersion{ .major = 0, .minor = 1, .patch = 0 };
 
     // Module
     _ = b.addModule("sieve", .{ .root_source_file = root_source_file });
@@ -12,46 +14,47 @@ pub fn build(b: *std.Build) void {
 
     const lib = b.addStaticLibrary(.{
         .name = "sieve",
-        .root_source_file = root_source_file,
         .target = target,
-        .optimize = b.standardOptimizeOption(.{}),
-        .version = .{ .major = 0, .minor = 1, .patch = 0 },
+        .version = version,
+        .optimize = optimize,
+        .root_source_file = root_source_file,
     });
 
     const lib_install = b.addInstallArtifact(lib, .{});
     lib_step.dependOn(&lib_install.step);
     b.default_step.dependOn(lib_step);
 
-    // Docs
-    const docs_step = b.step("docs", "Emit docs");
+    // Documentation
+    const doc_step = b.step("doc", "Emit documentation");
 
-    const docs_install = b.addInstallDirectory(.{
-        .source_dir = lib.getEmittedDocs(),
+    const doc_install = b.addInstallDirectory(.{
         .install_dir = .prefix,
-        .install_subdir = "docs",
+        .install_subdir = "doc",
+        .source_dir = lib.getEmittedDocs(),
     });
+    doc_step.dependOn(&doc_install.step);
+    b.default_step.dependOn(doc_step);
 
-    docs_step.dependOn(&docs_install.step);
-    b.default_step.dependOn(docs_step);
+    // Benchmarks
+    const benchs_step = b.step("bench", "Run benchmarks");
 
-    // Benchmark
-    const bench_step = b.step("bench", "Run benchmarks");
-
-    const bench = b.addExecutable(.{
-        .name = "sieve_bench",
-        .root_source_file = b.path("src/bench.zig"),
+    const benchs = b.addExecutable(.{
+        .name = "bench",
         .target = target,
         .optimize = .ReleaseFast,
+        .root_source_file = b.path("src/bench.zig"),
     });
 
-    const bench_run = b.addRunArtifact(bench);
-    bench_step.dependOn(&bench_run.step);
-    b.default_step.dependOn(bench_step);
+    const benchs_run = b.addRunArtifact(benchs);
+    benchs_step.dependOn(&benchs_run.step);
+    b.default_step.dependOn(benchs_step);
 
-    // Tests
-    const tests_step = b.step("test", "Run tests");
+    // Test suite
+    const tests_step = b.step("test", "Run test suite");
 
     const tests = b.addTest(.{
+        .target = target,
+        .version = version,
         .root_source_file = root_source_file,
     });
 
@@ -59,23 +62,16 @@ pub fn build(b: *std.Build) void {
     tests_step.dependOn(&tests_run.step);
     b.default_step.dependOn(tests_step);
 
-    // Code coverage
-    const cov_step = b.step("cov", "Generate code coverage report");
+    // Formatting checks
+    const fmt_step = b.step("fmt", "Run formatting checks");
 
-    const cov_run = b.addSystemCommand(&.{ "kcov", "--clean", "--include-pattern=src/", "kcov-output" });
-    cov_run.addArtifactArg(tests);
-
-    cov_step.dependOn(&cov_run.step);
-    b.default_step.dependOn(cov_step);
-
-    // Lints
-    const lints_step = b.step("lint", "Run lints");
-
-    const lints = b.addFmt(.{
-        .paths = &.{ "src", "build.zig" },
+    const fmt = b.addFmt(.{
+        .paths = &.{
+            "src/",
+            "build.zig",
+        },
         .check = true,
     });
-
-    lints_step.dependOn(&lints.step);
-    b.default_step.dependOn(lints_step);
+    fmt_step.dependOn(&fmt.step);
+    b.default_step.dependOn(fmt_step);
 }

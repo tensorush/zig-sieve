@@ -17,17 +17,20 @@ pub fn main() !void {
     };
 
     var arena = std.heap.ArenaAllocator.init(gpa.allocator());
-    defer arena.deinit();
-
     const allocator = arena.allocator();
+    defer arena.deinit();
 
     // Standard output
     const std_out = std.io.getStdOut();
     var buf_writer = std.io.bufferedWriter(std_out.writer());
     const writer = buf_writer.writer();
 
-    // Number generator
-    var prng = std.rand.DefaultPrng.init(0);
+    // PRNG
+    var prng = std.Random.DefaultPrng.init(blk: {
+        var seed: u64 = undefined;
+        try std.posix.getrandom(std.mem.asBytes(&seed));
+        break :blk seed;
+    });
     const random = prng.random();
 
     // "Sequence" benchmark

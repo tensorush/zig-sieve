@@ -45,17 +45,18 @@ pub fn Cache(comptime K: type, comptime V: type) type {
             return self.map.contains(key);
         }
 
-        /// Get mutable node pointer associated with given key, otherwise return `null`.
-        pub fn get(self: Self, key: K) ?*Node {
+        /// Retrieve value associated with given key, otherwise return `null`.
+        pub fn get(self: Self, key: K) ?V {
             var node = self.map.get(key) orelse return null;
             node.is_visited = true;
-            return node;
+            return node.value;
         }
 
         /// Put node pointer and return `true` if associated key is not already present.
         /// Otherwise, put node pointer, evicting old entry, and return `false`.
         pub fn put(self: *Self, node: *Node) !bool {
             if (self.map.getPtr(node.key)) |old_node| {
+                node.is_visited = true;
                 old_node.* = node;
                 return false;
             } else {
@@ -78,12 +79,15 @@ pub fn Cache(comptime K: type, comptime V: type) type {
             }
         }
 
-        /// Remove key and return associated node pointer, otherwise return `null`.
-        pub fn fetchRemove(self: *Self, key: K) ?*Node {
+        /// Remove key and return associated value, otherwise return `null`.
+        pub fn fetchRemove(self: *Self, key: K) ?V {
             const node = self.map.get(key) orelse return null;
+            if (self.hand == node) {
+                self.hand = node.prev;
+            }
             _ = self.map.remove(key);
             self.removeNode(node);
-            return node;
+            return node.value;
         }
 
         fn removeNode(self: *Self, node: *Node) void {
@@ -118,25 +122,46 @@ pub fn Cache(comptime K: type, comptime V: type) type {
 }
 
 test Cache {
-    const StringCache = Cache([]const u8, []const u8);
+    {
+        const StringCache = Cache([]const u8, []const u8);
 
-    var cache = try StringCache.init(std.testing.allocator, 3);
-    defer cache.deinit(std.testing.allocator);
+        var cache = try StringCache.init(std.testing.allocator, 3);
+        defer cache.deinit(std.testing.allocator);
 
-    var foobar_node = StringCache.Node{ .key = "foo", .value = "bar" };
-    var zigzag_node = StringCache.Node{ .key = "zig", .value = "zag" };
-    var flipflop_node = StringCache.Node{ .key = "flip", .value = "flop" };
-    var ticktock_node = StringCache.Node{ .key = "tick", .value = "tock" };
+        var zigzag_node = StringCache.Node{ .key = "zig", .value = "zag" };
+        var foobar_node = StringCache.Node{ .key = "foo", .value = "bar" };
+        var flipflop_node = StringCache.Node{ .key = "flip", .value = "flop" };
+        var ticktock_node = StringCache.Node{ .key = "tick", .value = "tock" };
 
-    try std.testing.expect(try cache.put(&foobar_node));
-    try std.testing.expect(try cache.put(&zigzag_node));
-    try std.testing.expect(try cache.put(&flipflop_node));
-    try std.testing.expect(try cache.put(&ticktock_node));
+        try std.testing.expect(try cache.put(&zigzag_node));
+        try std.testing.expect(try cache.put(&foobar_node));
 
-    try std.testing.expectEqualStrings("bar", cache.fetchRemove("foo").?.value);
-    try std.testing.expectEqual(cache.get("foo"), null);
+        try std.testing.expectEqualStrings("bar", cache.fetchRemove("foo").?);
 
-    try std.testing.expectEqualStrings("zag", cache.get("zig").?.value);
-    try std.testing.expectEqualStrings("flop", cache.get("flip").?.value);
-    try std.testing.expectEqualStrings("tock", cache.get("tick").?.value);
+        try std.testing.expect(try cache.put(&flipflop_node));
+        try std.testing.expect(try cache.put(&ticktock_node));
+
+        try std.testing.expectEqualStrings("zag", cache.get("zig").?);
+        try std.testing.expectEqual(cache.get("foo"), null);
+        try std.testing.expectEqualStrings("flop", cache.get("flip").?);
+        try std.testing.expectEqualStrings("tock", cache.get("tick").?);
+    }
+    {
+        const StringCache = Cache([]const u8, []const u8);
+
+        var cache = try StringCache.init(std.testing.allocator, 3);
+        defer cache.deinit(std.testing.allocator);
+
+        var zigzag_node = StringCache.Node{ .key = "zig", .value = "zag" };
+        var zigupd_node = StringCache.Node{ .key = "zig", .value = "upd" };
+        var foobar_node = StringCache.Node{ .key = "foo", .value = "bar" };
+        var flipflop_node = StringCache.Node{ .key = "flip", .value = "flop" };
+
+        try std.testing.expect(try cache.put(&zigzag_node));
+        try std.testing.expect(try cache.put(&foobar_node));
+        try std.testing.expect(!try cache.put(&zigupd_node));
+        try std.testing.expect(try cache.put(&flipflop_node));
+
+        try std.testing.expectEqualStrings("upd", cache.get("zig").?);
+    }
 }

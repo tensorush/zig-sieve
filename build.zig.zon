@@ -1,5 +1,12 @@
 .{
     .name = "sieve",
     .version = "0.1.0",
-    .paths = .{""},
+    .minimum_zig_version = "0.13.0",
+    .paths = .{
+        "src/",
+        "build.zig",
+        "build.zig.zon",
+        "LICENSE",
+        "README.md",
+    },
 }
