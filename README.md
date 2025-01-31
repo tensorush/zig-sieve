@@ -7,12 +7,12 @@
 
 ## Zig implementation of [SIEVE cache eviction algorithm](https://cachemon.github.io/SIEVE-website/).
 
-### :rocket: Usage
+### Usage
 
 - Add `sieve` dependency to `build.zig.zon`.
 
 ```sh
-zig fetch --save https://github.com/tensorush/zig-sieve/archive/<git_tag_or_commit_hash>.tar.gz
+zig fetch --save git+https://github.com/tensorush/zig-sieve#<git_tag_or_commit_hash>
 ```
 
 - Use `sieve` dependency in `build.zig`.
@@ -26,7 +26,7 @@ const sieve_mod = sieve_dep.module("sieve");
 <compile>.root_module.addImport("sieve", sieve_mod);
 ```
 
-### :bar_chart: Benchmarks
+### Benchmarks
 
 - Sequence: the time to cache and retrieve integer values.
 
