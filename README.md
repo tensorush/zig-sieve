@@ -1,10 +1,5 @@
 # zig-sieve
 
-[![CI][ci-shd]][ci-url]
-[![CD][cd-shd]][cd-url]
-[![DC][dc-shd]][dc-url]
-[![LC][lc-shd]][lc-url]
-
 ## Zig implementation of [SIEVE cache eviction algorithm](https://cachemon.github.io/SIEVE-website/).
 
 ### Usage
@@ -12,7 +7,7 @@
 - Add `sieve` dependency to `build.zig.zon`.
 
 ```sh
-zig fetch --save git+https://github.com/tensorush/zig-sieve#<git_tag_or_commit_hash>
+zig fetch --save git+https://github.com/tensorush/zig-sieve
 ```
 
 - Use `sieve` dependency in `build.zig`.
@@ -26,36 +21,25 @@ const sieve_mod = sieve_dep.module("sieve");
 <compile>.root_module.addImport("sieve", sieve_mod);
 ```
 
-### Benchmarks
+### Benchmarks (MacBook M1 Pro)
 
 - Sequence: the time to cache and retrieve integer values.
 
     ```sh
     $ zig build bench -- -s
-    Sequence: 28.833us
+    Sequence: 23.042us
     ```
 
 - Composite: the time to cache and retrieve composite values.
 
     ```sh
     $ zig build bench -- -c
-    Composite: 45.291us
+    Composite: 33.417us
     ```
 
 - Composite (normal): the time to cache and retrieve normally-distributed composite values.
 
     ```sh
     $ zig build bench -- -n
-    Composite Normal: 135.25us
+    Composite Normal: 99.708us
     ```
-
-<!-- MARKDOWN LINKS -->
-
-[ci-shd]: https://img.shields.io/github/actions/workflow/status/tensorush/zig-sieve/ci.yaml?branch=main&style=for-the-badge&logo=github&label=CI&labelColor=black
-[ci-url]: https://github.com/tensorush/zig-sieve/blob/main/.github/workflows/ci.yaml
-[cd-shd]: https://img.shields.io/github/actions/workflow/status/tensorush/zig-sieve/cd.yaml?branch=main&style=for-the-badge&logo=github&label=CD&labelColor=black
-[cd-url]: https://github.com/tensorush/zig-sieve/blob/main/.github/workflows/cd.yaml
-[dc-shd]: https://img.shields.io/badge/click-F6A516?style=for-the-badge&logo=zig&logoColor=F6A516&label=docs&labelColor=black
-[dc-url]: https://tensorush.github.io/zig-sieve
-[lc-shd]: https://img.shields.io/github/license/tensorush/zig-sieve.svg?style=for-the-badge&labelColor=black
-[lc-url]: https://github.com/tensorush/zig-sieve/blob/main/LICENSE

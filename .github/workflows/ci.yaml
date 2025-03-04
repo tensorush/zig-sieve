@@ -19,8 +19,10 @@ jobs:
 
       - name: Set up Zig
         uses: mlugg/setup-zig@v1
+        with:
+          version: master
 
-      - name: Run `test`
+      - name: Run test step
         run: zig build test --summary all
 
   fmt:
@@ -32,6 +34,8 @@ jobs:
 
       - name: Set up Zig
         uses: mlugg/setup-zig@v1
+        with:
+          version: master
 
-      - name: Run `fmt`
+      - name: Run fmt step
         run: zig build fmt

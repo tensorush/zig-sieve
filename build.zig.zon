@@ -1,6 +1,7 @@
 .{
-    .name = "sieve",
-    .version = "0.1.0",
+    .name = .sieve,
+    .fingerprint = 0x34df97e7ea21fbe6,
+    .version = "0.1.1",
     .minimum_zig_version = "0.14.0",
     .paths = .{
         "src/",

@@ -1,5 +1,3 @@
-//! Root library file that exposes the public API.
-
 const std = @import("std");
 
 /// Intrusive cache based on the SIEVE eviction algorithm.
