@@ -54,7 +54,7 @@ fn benchmarkSequence(gpa: std.mem.Allocator, writer: anytype) !void {
         num = i % 100;
         node = try gpa.create(Cache.Node);
         node.* = .{ .key = num, .value = num };
-        _ = try cache.put(node);
+        _ = cache.put(node);
     }
 
     while (i < NUM_ITERS) : (i += 1) {
@@ -80,7 +80,7 @@ fn benchmarkComposite(gpa: std.mem.Allocator, random: std.Random, writer: anytyp
         num = random.uintLessThan(u64, 100);
         node = try gpa.create(Cache.Node);
         node.* = .{ .key = num, .value = .{ @splat(0), num } };
-        _ = try cache.put(node);
+        _ = cache.put(node);
     }
 
     while (i < NUM_ITERS) : (i += 1) {
@@ -107,7 +107,7 @@ fn benchmarkCompositeNormal(gpa: std.mem.Allocator, random: std.Random, writer: 
         num %= 100;
         node = try gpa.create(Cache.Node);
         node.* = .{ .key = num, .value = .{ @splat(0), num } };
-        _ = try cache.put(node);
+        _ = cache.put(node);
     }
 
     while (i < NUM_ITERS) : (i += 1) {

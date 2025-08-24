@@ -22,7 +22,7 @@ pub fn Cache(comptime K: type, comptime V: type) type {
         };
 
         /// Initialize cache with given capacity.
-        pub fn init(allocator: std.mem.Allocator, capacity: u32) !Self {
+        pub fn init(allocator: std.mem.Allocator, capacity: u32) std.mem.Allocator.Error!Self {
             var self: Self = .{};
             try self.map.ensureTotalCapacity(allocator, capacity);
             return self;
@@ -53,7 +53,7 @@ pub fn Cache(comptime K: type, comptime V: type) type {
 
         /// Put node pointer and return `true` if associated key is not already present.
         /// Otherwise, put node pointer, evicting old entry, and return `false`.
-        pub fn put(self: *Self, node: *Node) !bool {
+        pub fn put(self: *Self, node: *Node) bool {
             if (self.map.getPtr(node.key)) |old_node| {
                 node.is_visited = true;
                 old_node.* = node;
@@ -132,13 +132,13 @@ test Cache {
         var flipflop_node: StringCache.Node = .{ .key = "flip", .value = "flop" };
         var ticktock_node: StringCache.Node = .{ .key = "tick", .value = "tock" };
 
-        try std.testing.expect(try cache.put(&zigzag_node));
-        try std.testing.expect(try cache.put(&foobar_node));
+        try std.testing.expect(cache.put(&zigzag_node));
+        try std.testing.expect(cache.put(&foobar_node));
 
         try std.testing.expectEqualStrings("bar", cache.fetchRemove("foo").?);
 
-        try std.testing.expect(try cache.put(&flipflop_node));
-        try std.testing.expect(try cache.put(&ticktock_node));
+        try std.testing.expect(cache.put(&flipflop_node));
+        try std.testing.expect(cache.put(&ticktock_node));
 
         try std.testing.expectEqualStrings("zag", cache.get("zig").?);
         try std.testing.expectEqual(cache.get("foo"), null);
@@ -156,10 +156,10 @@ test Cache {
         var foobar_node: StringCache.Node = .{ .key = "foo", .value = "bar" };
         var flipflop_node: StringCache.Node = .{ .key = "flip", .value = "flop" };
 
-        try std.testing.expect(try cache.put(&zigzag_node));
-        try std.testing.expect(try cache.put(&foobar_node));
-        try std.testing.expect(!try cache.put(&zigupd_node));
-        try std.testing.expect(try cache.put(&flipflop_node));
+        try std.testing.expect(cache.put(&zigzag_node));
+        try std.testing.expect(cache.put(&foobar_node));
+        try std.testing.expect(!cache.put(&zigupd_node));
+        try std.testing.expect(cache.put(&flipflop_node));
 
         try std.testing.expectEqualStrings("upd", cache.get("zig").?);
     }

@@ -35,10 +35,10 @@ pub fn build(b: *std.Build) !void {
     });
     docs_step.dependOn(&docs_install.step);
 
-    // Benchmarks
-    const benchs_step = b.step("bench", "Run benchmarks");
+    // Benchmark
+    const bench_step = b.step("bench", "Run benchmark");
 
-    const benchs = b.addExecutable(.{
+    const bench_exe = b.addExecutable(.{
         .name = "bench",
         .version = version,
         .root_module = b.createModule(.{
@@ -48,11 +48,11 @@ pub fn build(b: *std.Build) !void {
         }),
     });
 
-    const benchs_run = b.addRunArtifact(benchs);
+    const bench_exe_run = b.addRunArtifact(bench_exe);
     if (b.args) |args| {
-        benchs_run.addArgs(args);
+        bench_exe_run.addArgs(args);
     }
-    benchs_step.dependOn(&benchs_run.step);
+    bench_step.dependOn(&bench_exe_run.step);
 
     // Test suite
     const tests_step = b.step("test", "Run test suite");
