@@ -5,28 +5,28 @@ on:
     workflows: [CI]
     types: [completed]
 
-  workflow_dispatch:
+concurrency:
+  group: cd
+  cancel-in-progress: true
 
 jobs:
   emit:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success' }}
 
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Zig
-        uses: mlugg/setup-zig@v1
-        with:
-          version: master
+        uses: mlugg/setup-zig@v2
 
-      - name: Run doc step
+      - name: Run `doc` step
         run: zig build doc
 
       - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: zig-out/docs/
 

@@ -4,13 +4,13 @@
 
 ### Usage
 
-- Add `sieve` dependency to `build.zig.zon`.
+1. Add `sieve` dependency to `build.zig.zon`:
 
 ```sh
-zig fetch --save git+https://github.com/tensorush/zig-sieve
+zig fetch --save git+https://github.com/tensorush/zig-sieve.git
 ```
 
-- Use `sieve` dependency in `build.zig`.
+2. Use `sieve` dependency in `build.zig`:
 
 ```zig
 const sieve_dep = b.dependency("sieve", .{
@@ -23,23 +23,23 @@ const sieve_mod = sieve_dep.module("sieve");
 
 ### Benchmarks (MacBook M1 Pro)
 
-- Sequence: the time to cache and retrieve integer values.
+- Sequence - the time to cache and retrieve integer values:
 
-    ```sh
-    $ zig build bench -- -s
-    Sequence: 23.042us
-    ```
+```sh
+$ zig build bench -- s
+Sequence: 22.958us
+```
 
-- Composite: the time to cache and retrieve composite values.
+- Composite - the time to cache and retrieve composite values:
 
-    ```sh
-    $ zig build bench -- -c
-    Composite: 33.417us
-    ```
+```sh
+$ zig build bench -- c
+Composite: 37.668us
+```
 
-- Composite (normal): the time to cache and retrieve normally-distributed composite values.
+- Composite (normal) - the time to cache and retrieve normally-distributed composite values:
 
-    ```sh
-    $ zig build bench -- -n
-    Composite Normal: 99.708us
-    ```
+```sh
+$ zig build bench -- n
+Composite Normal: 108.001us
+```

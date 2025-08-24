@@ -1,41 +1,39 @@
 const std = @import("std");
 
-pub fn build(b: *std.Build) void {
+const manifest = @import("build.zig.zon");
+
+pub fn build(b: *std.Build) !void {
     const install_step = b.getInstallStep();
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const root_source_file = b.path("src/root.zig");
-    const version = std.SemanticVersion{ .major = 0, .minor = 1, .patch = 1 };
+    const version: std.SemanticVersion = try .parse(manifest.version);
 
-    // Module
-    const mod = b.addModule("sieve", .{
+    // Public root module
+    const root_mod = b.addModule("sieve", .{
         .target = target,
         .optimize = optimize,
         .root_source_file = root_source_file,
+        .strip = b.option(bool, "strip", "Strip the binary"),
     });
 
     // Library
-    const lib_step = b.step("lib", "Install library");
-
     const lib = b.addLibrary(.{
         .name = "sieve",
         .version = version,
-        .root_module = mod,
+        .root_module = root_mod,
     });
-
-    const lib_install = b.addInstallArtifact(lib, .{});
-    lib_step.dependOn(&lib_install.step);
-    install_step.dependOn(lib_step);
+    b.installArtifact(lib);
 
     // Documentation
     const docs_step = b.step("doc", "Emit documentation");
+
     const docs_install = b.addInstallDirectory(.{
         .install_dir = .prefix,
         .install_subdir = "docs",
         .source_dir = lib.getEmittedDocs(),
     });
     docs_step.dependOn(&docs_install.step);
-    install_step.dependOn(docs_step);
 
     // Benchmarks
     const benchs_step = b.step("bench", "Run benchmarks");
@@ -60,11 +58,7 @@ pub fn build(b: *std.Build) void {
     const tests_step = b.step("test", "Run test suite");
 
     const tests = b.addTest(.{
-        .version = version,
-        .root_module = b.createModule(.{
-            .target = target,
-            .root_source_file = root_source_file,
-        }),
+        .root_module = root_mod,
     });
 
     const tests_run = b.addRunArtifact(tests);
@@ -84,4 +78,14 @@ pub fn build(b: *std.Build) void {
     });
     fmt_step.dependOn(&fmt.step);
     install_step.dependOn(fmt_step);
+
+    // Compilation check for ZLS Build-On-Save
+    // See: https://zigtools.org/zls/guides/build-on-save/
+    const check_step = b.step("check", "Check compilation");
+    const check_exe = b.addExecutable(.{
+        .name = "sieve",
+        .version = version,
+        .root_module = root_mod,
+    });
+    check_step.dependOn(&check_exe.step);
 }

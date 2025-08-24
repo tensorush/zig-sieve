@@ -3,8 +3,14 @@ const std = @import("std");
 /// Intrusive cache based on the SIEVE eviction algorithm.
 pub fn Cache(comptime K: type, comptime V: type) type {
     return struct {
+        map: HashMap = .{},
+        hand: ?*Node = null,
+        head: ?*Node = null,
+        tail: ?*Node = null,
+
         const Self = @This();
-        const HashMapUnmanaged = if (K == []const u8) std.StringHashMapUnmanaged(*Node) else std.AutoHashMapUnmanaged(K, *Node);
+
+        const HashMap = if (K == []const u8) std.StringHashMapUnmanaged(*Node) else std.AutoHashMapUnmanaged(K, *Node);
 
         /// Intrusive cache's node.
         pub const Node = struct {
@@ -15,14 +21,9 @@ pub fn Cache(comptime K: type, comptime V: type) type {
             key: K,
         };
 
-        map: HashMapUnmanaged = HashMapUnmanaged{},
-        hand: ?*Node = null,
-        head: ?*Node = null,
-        tail: ?*Node = null,
-
         /// Initialize cache with given capacity.
         pub fn init(allocator: std.mem.Allocator, capacity: u32) !Self {
-            var self = Self{};
+            var self: Self = .{};
             try self.map.ensureTotalCapacity(allocator, capacity);
             return self;
         }
@@ -123,13 +124,13 @@ test Cache {
     {
         const StringCache = Cache([]const u8, []const u8);
 
-        var cache = try StringCache.init(std.testing.allocator, 3);
+        var cache: StringCache = try .init(std.testing.allocator, 3);
         defer cache.deinit(std.testing.allocator);
 
-        var zigzag_node = StringCache.Node{ .key = "zig", .value = "zag" };
-        var foobar_node = StringCache.Node{ .key = "foo", .value = "bar" };
-        var flipflop_node = StringCache.Node{ .key = "flip", .value = "flop" };
-        var ticktock_node = StringCache.Node{ .key = "tick", .value = "tock" };
+        var zigzag_node: StringCache.Node = .{ .key = "zig", .value = "zag" };
+        var foobar_node: StringCache.Node = .{ .key = "foo", .value = "bar" };
+        var flipflop_node: StringCache.Node = .{ .key = "flip", .value = "flop" };
+        var ticktock_node: StringCache.Node = .{ .key = "tick", .value = "tock" };
 
         try std.testing.expect(try cache.put(&zigzag_node));
         try std.testing.expect(try cache.put(&foobar_node));
@@ -147,13 +148,13 @@ test Cache {
     {
         const StringCache = Cache([]const u8, []const u8);
 
-        var cache = try StringCache.init(std.testing.allocator, 3);
+        var cache: StringCache = try .init(std.testing.allocator, 3);
         defer cache.deinit(std.testing.allocator);
 
-        var zigzag_node = StringCache.Node{ .key = "zig", .value = "zag" };
-        var zigupd_node = StringCache.Node{ .key = "zig", .value = "upd" };
-        var foobar_node = StringCache.Node{ .key = "foo", .value = "bar" };
-        var flipflop_node = StringCache.Node{ .key = "flip", .value = "flop" };
+        var zigzag_node: StringCache.Node = .{ .key = "zig", .value = "zag" };
+        var zigupd_node: StringCache.Node = .{ .key = "zig", .value = "upd" };
+        var foobar_node: StringCache.Node = .{ .key = "foo", .value = "bar" };
+        var flipflop_node: StringCache.Node = .{ .key = "flip", .value = "flop" };
 
         try std.testing.expect(try cache.put(&zigzag_node));
         try std.testing.expect(try cache.put(&foobar_node));
