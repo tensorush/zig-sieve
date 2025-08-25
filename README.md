@@ -18,7 +18,12 @@ const sieve_dep = b.dependency("sieve", .{
     .optimize = optimize,
 });
 const sieve_mod = sieve_dep.module("sieve");
-<compile>.root_module.addImport("sieve", sieve_mod);
+
+...
+    .imports = &.{
+        .{ .name = "sieve", .module = sieve_mod },
+    },
+...
 ```
 
 ### Benchmarks (MacBook M1 Pro)
