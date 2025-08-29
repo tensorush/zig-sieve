@@ -14,7 +14,7 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
         .root_source_file = root_source_file,
-        .strip = b.option(bool, "strip", "Strip the binary"),
+        .strip = b.option(bool, "strip", "Strip binary"),
     });
 
     // Library
